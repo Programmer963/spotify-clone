@@ -1,18 +1,30 @@
 'use client'
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import styles from '../../styles/body.module.scss'
 import {AiFillClockCircle} from "react-icons/ai";
 import {useGetPlaylistQuery} from "../../services/playlists";
 import { useDispatch, useSelector } from "react-redux";
 import {addPlaylist} from "../../lib/slices/bodyPlaylists.slice";
+import {useParams} from "next/navigation";
 
 
-const Body = () => {
-    const dispatch = useDispatch(); // Получаем функцию диспетчера из Redux
+
+const Body = ({headerBackground, onSearch}) => {
+
+    const dispatch = useDispatch();
     const playlist = useSelector((state) => state.playlists && state.playlists.playlists[0]);
 
-
     const { data, isLoading, error } = useGetPlaylistQuery();
+
+    const [searchTerm, setSearchTerm] = useState("");
+    useEffect(() => {
+        setSearchTerm(onSearch);
+    }, [setSearchTerm, onSearch]);
+
+    const filteredTracks = playlist ? playlist.tracks.filter(track =>
+        track.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ) : [];
+
     useEffect(() => {
         if (!isLoading) {
             const selectedPlaylist = {
@@ -55,7 +67,7 @@ const Body = () => {
                         </div>
 
                         <div className={styles.body_list}>
-                            <div className={styles.header_row}>
+                            <div className={styles.header_row} style={headerBackground?{backgroundColor:'#000'} : {}}>
                                 <div className={styles.col}>
                                     <span>#</span>
                                 </div>
@@ -71,64 +83,33 @@ const Body = () => {
                             </div>
 
                             <div className={styles.tracks}>
-                                {
-                                    playlist.tracks.map(({
-                                        id,
-                                        name,
-                                        artists,
-                                        image,
-                                        duration,
-                                        album,
-                                        context_uri,
-                                        track_number
-                                    }, index) => {
-                                        return (
-                                            <div className={styles.row} key={id}>
-                                                <div className={styles.col}>
-                                                    <span>{index + 1}</span>
+                                {filteredTracks.map(({ id, name, artists, image, duration, album, context_uri, track_number }, index) => (
+                                        <div className={styles.row} key={id}>
+                                            <div className={styles.col}>
+                                                <span>{index + 1}</span>
+                                            </div>
+                                            <div className={styles.col} style={{display: 'flex', gap: '1rem'}}>
+                                                <div className={styles.image}>
+                                                    <img src={image} alt={'track-image'}/>
                                                 </div>
-                                                <div className={styles.col} style={{display: 'flex', gap: '1rem'}}>
-                                                    <div className={styles.image}>
-                                                        <img src={image} alt={'track-image'}/>
-                                                    </div>
-                                                    <div className={styles.info}>
-                                                        <span className={styles.name}>{name}</span>
-                                                        <span>{artists}</span>
-                                                    </div>
-                                                </div>
-                                                <div className={styles.col}>
-                                                    <span>{album}</span>
-                                                </div>
-                                                <div className={styles.col}>
-                                                    <span>{duration}</span>
+                                                <div className={styles.info}>
+                                                    <span className={styles.name}>{name}</span>
+                                                    <span>{artists}</span>
                                                 </div>
                                             </div>
-                                        )
-                                    })
-                                }
+                                            <div className={styles.col}>
+                                                <span>{album}</span>
+                                            </div>
+                                            <div className={styles.col}>
+                                                <span>{duration}</span>
+                                            </div>
+                                        </div>
+                                ))}
                             </div>
                         </div>
                     </>
                 )
             }
-            {/*{playlist ? (*/}
-            {/*    <div className={styles.playlist}>*/}
-            {/*        <h2>{playlist.name}</h2>*/}
-            {/*        <p>{playlist.description}</p>*/}
-            {/*        <img src={playlist.image} alt={playlist.name} />*/}
-            {/*        <ul>*/}
-            {/*            {playlist.tracks.map((track) => (*/}
-            {/*                <li key={track.id}>*/}
-            {/*                    <p>{track.name}</p>*/}
-            {/*                    <p>{track.artists.join(", ")}</p>*/}
-            {/*                    <img src={track.image} alt={track.name} />*/}
-            {/*                </li>*/}
-            {/*            ))}*/}
-            {/*        </ul>*/}
-            {/*    </div>*/}
-            {/*) : (*/}
-            {/*    <p>Loading...</p>*/}
-            {/*)}*/}
         </div>
     );
 };

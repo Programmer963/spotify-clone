@@ -5,6 +5,7 @@ import {homeApi} from "../services/home";
 import {userPlaylistsApi} from "../services/playlists";
 import {profileApi} from "../services/profile";
 import playlistsReducer from './slices/bodyPlaylists.slice'
+import {currentTrackApi} from "@/src/services/currentTrack";
 
 export const makeStore = () => {
   return configureStore({
@@ -13,11 +14,12 @@ export const makeStore = () => {
       [homeApi.reducerPath]: homeApi.reducer,
       [userPlaylistsApi.reducerPath]: userPlaylistsApi.reducer,
       [profileApi.reducerPath]: profileApi.reducer,
+      [currentTrackApi.reducerPath]: currentTrackApi.reducer,
       playlists: playlistsReducer,
     },
     middleware: (getDefaultMiddleware: any) =>
       getDefaultMiddleware().concat(loginApi.middleware, homeApi.middleware,
-          userPlaylistsApi.middleware, profileApi.middleware,
+          userPlaylistsApi.middleware, profileApi.middleware, currentTrackApi.middleware
           ),
   });
 };
